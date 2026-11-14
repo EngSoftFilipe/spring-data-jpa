@@ -52,10 +52,25 @@ PGADMIN_DEFAULT_PASSWORD=sua_senha
 docker ps
 ```
  
+- Na coluna STATUS:
+  - `Up` --> ligado
+  - `Exited (0)` --> desligou normalmente
+  - `Exited (255)` --> desligou de repente (ex: o computador ou o Docker fechou). O PostgreSQL se recupera sozinho na próxima vez que ligar
+
+### docker start e docker stop
+- `docker start` liga um container que já existe (não cria outro, diferente do `docker run`)
+- `docker stop` desliga o container de forma segura, deixando o banco fechar tudo direito
+- Os containers desligam quando o computador reinicia, então ao voltar preciso ligar de novo
+```bash
+docker start meu-projeto-db meu-projeto-pgadmin
+docker stop meu-projeto-pgadmin meu-projeto-db
+```
+
 ### docker rm
-- Apaga um container
+- Apaga um container (`docker container rm` faz a mesma coisa)
 - O `-f` força, mesmo se ele estiver ligado
 - Usado quando dá erro de nome repetido, ou quando preciso recriar o container
+- Os dados que estão dentro do container são apagados junto (o volume, com `-v`, resolve isso)
 ```bash
 docker rm -f meu-projeto-db
 ```
@@ -78,6 +93,11 @@ docker exec -it meu-projeto-db psql -U postgres
 # \l --> lista os bancos
 # \q --> sai
 ```
+
+- Também serve para ver com quais variáveis o container foi criado (útil quando o login dá erro):
+```bash
+docker exec meu-projeto-db printenv POSTGRES_USER
+```
  
 ### docker network
 - Cria uma rede para os containers se enxergarem
@@ -94,11 +114,31 @@ docker run ... --network meu-projeto-net ...            # cria um container já 
 - Gratuita e de código aberto
 - O PostgreSQL em si não tem tela: é só o servidor. O visual vem do pgAdmin, e o terminal vem do `psql`
 ```bash
-docker run --name meu-projeto-pgadmin -p 15432:80 --env-file .env -d dpage/pgadmin4:9.19
+docker network create meu-projeto-net
+docker run --name meu-projeto-db -p 5432:5432 --env-file .env --network meu-projeto-net -d postgres:18.7
+docker run --name meu-projeto-pgadmin -p 15432:80 --env-file .env --network meu-projeto-net -d dpage/pgadmin4:9.19
 ```
- 
+
 - Acesso pelo navegador: `http://localhost:15432`
-- Para conectar no banco (Add New Server --> Connection):
-  - Com os dois containers na mesma rede: Host = nome do container do banco (ex: `meu-projeto-db`)
-  - Sem rede: Host = `host.docker.internal`
-  - Port = `5432`, e usuário e senha do `POSTGRES_USER` e `POSTGRES_PASSWORD`
+- Para conectar no banco (Add New Server):
+  - General --> Name: só um apelido. Padrão de mercado é projeto + ambiente (ex: `meu-projeto (local)`), para não confundir o banco local com o de produção
+  - Connection --> Host:
+    - Com os dois containers na mesma rede: nome do container do banco (ex: `meu-projeto-db`)
+    - Sem rede: `host.docker.internal`
+  - Connection --> Port = `5432`
+  - Connection --> Username e Password = os do `POSTGRES_USER` e `POSTGRES_PASSWORD` (e não o login do pgAdmin)
+- O cadastro do servidor fica dentro do container do pgAdmin: se o container for apagado e criado de novo, preciso cadastrar outra vez
+
+> ## Problemas comuns
+
+| Erro | Causa | Solução |
+|---|---|---|
+| `open .env: O sistema não pode encontrar o arquivo especificado` | Terminal fora da pasta do projeto | Entrar na pasta com `cd` antes do `docker run` |
+| `server closed the connection unexpectedly` | O container do banco está desligado | `docker ps -a` para conferir e `docker start` para ligar |
+| `password authentication failed for user "..."` | Usuário ou senha diferentes dos que o container usou na criação | Conferir com `docker exec ... printenv`, ou recriar o container com o `.env` atual |
+| Container desliga logo depois do `docker run` | Faltou o `POSTGRES_PASSWORD` | Colocar a variável no `.env` e recriar |
+| Nome repetido ao rodar `docker run` | Já existe um container com esse nome | `docker rm -f nome` ou usar `docker start` em vez de `docker run` |
+
+- No `.env`, escrever os valores sem aspas: o Docker considera as aspas como parte do valor
+- Abrir o terminal direto na pasta do projeto: no Explorador de Arquivos, digitar `cmd` na barra de endereço
+ 
