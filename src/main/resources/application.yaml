@@ -2,6 +2,9 @@ spring:
   application:
     name: spring-data-jpa
 
+  main:
+    banner-mode: off
+
   config:
     import: optional:file:.env[.properties]
 
@@ -9,7 +12,12 @@ spring:
     url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: springdatajpa-pool
+      maximum-pool-size: 10
+      minimum-idle: 10
+      connection-timeout: 30000
+      max-lifetime: 1800000
 
   output:
     ansi:

@@ -9,7 +9,9 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
 
-@Configuration
+// Configuração manual do DataSource
+// O pool agora é configurado pelo application.yaml (spring.datasource.hikari)
+//@Configuration
 public class DatabaseConfiguration {
 
     @Value("${spring.datasource.url}")
