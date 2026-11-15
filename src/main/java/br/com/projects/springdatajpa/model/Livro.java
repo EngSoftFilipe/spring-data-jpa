@@ -5,7 +5,6 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -37,7 +36,4 @@ public class Livro {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_autor", nullable = false)
     private Autor autor;
-
-    @OneToMany(mappedBy = "autor")
-    private List<Livro> livros;
 }
