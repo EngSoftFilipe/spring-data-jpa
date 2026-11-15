@@ -1,12 +1,16 @@
 package br.com.projects.springdatajpa.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
 @Table(name = "autor")
+@Getter
+@Setter
 public class Autor {
 
     @Id
@@ -24,16 +28,4 @@ public class Autor {
     private String nacionalidade;
 
     public Autor(){}
-
-    public UUID getId() {return id;}
-    public void setId(UUID id) {this.id = id;}
-
-    public String getNome() {return nome;}
-    public void setNome(String nome) {this.nome = nome;}
-
-    public LocalDate getDataNascimento() {return dataNascimento;}
-    public void setDataNascimento(LocalDate dataNascimento) {this.dataNascimento = dataNascimento;}
-
-    public String getNacionalidade() {return nacionalidade;}
-    public void setNacionalidade(String nacionalidade) {this.nacionalidade = nacionalidade;}
 }
