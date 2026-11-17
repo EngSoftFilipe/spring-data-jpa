@@ -22,7 +22,7 @@ public class AutorRepositoryTest {
     @Test
     @DisplayName("count: deve mostrar a quantidade de autores")
     public void qtdAutoresTest(){
-        System.out.println("Qauntidade de autores: " + repository.count());
+        System.out.println("Quantidade de autores: " + repository.count());
     }
 
     @Test
@@ -69,10 +69,10 @@ public class AutorRepositoryTest {
     }
 
     @Test
-    @DisplayName("delete: deve excluir autor por ID")
+    @DisplayName("delete: deve excluir autor pelo objeto")
     public void excluirPorObjetoTest(){
         var id = UUID.fromString("35796157-a27e-423e-82d6-63106ee3e5bc");
-        var objeto = repository.findById(id).get();
+        var objeto = repository.findById(id).orElseThrow();
         repository.delete(objeto);
 
     }
