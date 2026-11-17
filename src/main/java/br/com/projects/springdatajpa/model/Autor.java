@@ -3,6 +3,7 @@ package br.com.projects.springdatajpa.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Table(name = "autor")
 @Getter
 @Setter
+@ToString
 public class Autor {
 
     @Id
@@ -29,6 +31,7 @@ public class Autor {
     private String nacionalidade;
 
     @OneToMany(mappedBy = "autor")
+    @ToString.Exclude
     private List<Livro> livros;
 
     public Autor(){}
