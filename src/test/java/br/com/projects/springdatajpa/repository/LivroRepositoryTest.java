@@ -82,4 +82,13 @@ class LivroRepositoryTest {
         var livroAtualizado = livroRepository.save(livroParaAtualizar);
         assertEquals(idAutor, livroAtualizado.getAutor().getId());
     }
+
+    @Test
+    @DisplayName("deleteById: deve excluir o livro pelo id")
+    void deletarTest(){
+        UUID id = UUID.fromString("25fdfeb3-bae3-4c87-8ea8-57885df58169");
+        livroRepository.deleteById(id);
+
+        assertFalse(livroRepository.existsById(id));
+    }
 }
