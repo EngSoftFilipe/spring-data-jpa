@@ -46,4 +46,25 @@ class LivroRepositoryTest {
         var livroSalvo = livroRepository.save(livro);
         assertNotNull(livroSalvo.getId());
     }
+
+    @Test
+    @DisplayName("save: deve criar o livro criando o autor na hora")
+    void salvarCascadeTest() {
+        Livro livro = new Livro();
+        livro.setIsbn("90887-84874");
+        livro.setPreco(BigDecimal.valueOf(100));
+        livro.setGenero(GeneroLivro.FICCAO);
+        livro.setTitulo("UFO");
+        livro.setDataPublicacao(LocalDate.of(1980, 1, 2));
+
+        Autor autor = new Autor();
+        autor.setNome("João");
+        autor.setNacionalidade("Brasileiro");
+        autor.setDataNascimento(LocalDate.of(1964, 10, 25));
+
+        livro.setAutor(autor);
+
+        var livroSalvo = livroRepository.save(livro);
+        assertNotNull(livroSalvo.getId());
+    }
 }
