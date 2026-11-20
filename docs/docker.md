@@ -56,7 +56,6 @@ docker ps
   - `Up` --> ligado
   - `Exited (0)` --> desligou normalmente
   - `Exited (255)` --> desligou de repente (ex: o computador ou o Docker fechou). O PostgreSQL se recupera sozinho na próxima vez que ligar
-
 ### docker start e docker stop
 - `docker start` liga um container que já existe (não cria outro, diferente do `docker run`)
 - `docker stop` desliga o container de forma segura, deixando o banco fechar tudo direito
@@ -65,12 +64,14 @@ docker ps
 docker start meu-projeto-db meu-projeto-pgadmin
 docker stop meu-projeto-pgadmin meu-projeto-db
 ```
-
+ 
 ### docker rm
 - Apaga um container (`docker container rm` faz a mesma coisa)
 - O `-f` força, mesmo se ele estiver ligado
 - Usado quando dá erro de nome repetido, ou quando preciso recriar o container
-- Os dados que estão dentro do container são apagados junto (o volume, com `-v`, resolve isso)
+- Os dados que estão dentro do container somem junto com ele: um container novo começa com o banco vazio
+- Para os dados sobreviverem, o container do banco precisa ser criado com um volume (`-v nome-do-volume:/var/lib/postgresql`)
+- Apagar o container do pgAdmin não afeta o banco: os dados ficam no container do PostgreSQL
 ```bash
 docker rm -f meu-projeto-db
 ```
@@ -87,16 +88,18 @@ docker logs meu-projeto-db
 - O `-it` abre de forma interativa, para eu poder digitar
 - Exemplo prático: abrir o `psql`, o cliente de terminal do PostgreSQL
 ```bash
-docker exec -it meu-projeto-db psql -U postgres
+docker exec -it meu-projeto-db psql -U seu_usuario -d nome_do_banco
  
 # dentro do psql:
 # \l --> lista os bancos
 # \q --> sai
 ```
-
+ 
+- O `-U` é o usuário do `POSTGRES_USER`. O usuário `postgres` só existe se o `POSTGRES_USER` não for definido
 - Também serve para ver com quais variáveis o container foi criado (útil quando o login dá erro):
 ```bash
 docker exec meu-projeto-db printenv POSTGRES_USER
+docker exec meu-projeto-pgadmin printenv PGADMIN_DEFAULT_EMAIL
 ```
  
 ### docker network
@@ -118,7 +121,7 @@ docker network create meu-projeto-net
 docker run --name meu-projeto-db -p 5432:5432 --env-file .env --network meu-projeto-net -d postgres:18.7
 docker run --name meu-projeto-pgadmin -p 15432:80 --env-file .env --network meu-projeto-net -d dpage/pgadmin4:9.19
 ```
-
+ 
 - Acesso pelo navegador: `http://localhost:15432`
 - Para conectar no banco (Add New Server):
   - General --> Name: só um apelido. Padrão de mercado é projeto + ambiente (ex: `meu-projeto (local)`), para não confundir o banco local com o de produção
@@ -128,9 +131,8 @@ docker run --name meu-projeto-pgadmin -p 15432:80 --env-file .env --network meu-
   - Connection --> Port = `5432`
   - Connection --> Username e Password = os do `POSTGRES_USER` e `POSTGRES_PASSWORD` (e não o login do pgAdmin)
 - O cadastro do servidor fica dentro do container do pgAdmin: se o container for apagado e criado de novo, preciso cadastrar outra vez
-
 > ## Problemas comuns
-
+ 
 | Erro | Causa | Solução |
 |---|---|---|
 | `open .env: O sistema não pode encontrar o arquivo especificado` | Terminal fora da pasta do projeto | Entrar na pasta com `cd` antes do `docker run` |
@@ -138,7 +140,8 @@ docker run --name meu-projeto-pgadmin -p 15432:80 --env-file .env --network meu-
 | `password authentication failed for user "..."` | Usuário ou senha diferentes dos que o container usou na criação | Conferir com `docker exec ... printenv`, ou recriar o container com o `.env` atual |
 | Container desliga logo depois do `docker run` | Faltou o `POSTGRES_PASSWORD` | Colocar a variável no `.env` e recriar |
 | Nome repetido ao rodar `docker run` | Já existe um container com esse nome | `docker rm -f nome` ou usar `docker start` em vez de `docker run` |
-
+| Login do pgAdmin volta sempre para a tela de login | E-mail ou senha errados, ou conta bloqueada depois de várias tentativas erradas | Conferir com `docker exec ... printenv PGADMIN_DEFAULT_EMAIL`. Se estiver bloqueada, recriar o container do pgAdmin (o banco não é afetado) |
+| `relation "..." does not exist` no Query Tool | Query Tool aberto no banco errado (ex: `postgres` em vez do banco do projeto) | Abrir o Query Tool clicando no banco do projeto |
+ 
 - No `.env`, escrever os valores sem aspas: o Docker considera as aspas como parte do valor
 - Abrir o terminal direto na pasta do projeto: no Explorador de Arquivos, digitar `cmd` na barra de endereço
- 
