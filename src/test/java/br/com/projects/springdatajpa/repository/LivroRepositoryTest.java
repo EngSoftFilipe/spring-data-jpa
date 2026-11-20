@@ -67,4 +67,19 @@ class LivroRepositoryTest {
         var livroSalvo = livroRepository.save(livro);
         assertNotNull(livroSalvo.getId());
     }
+
+    @Test
+    @DisplayName("save: deve atualizar o autor do livro por um id existente")
+    void atualizarAutorDoLivroTest(){
+        UUID id = UUID.fromString("25fdfeb3-bae3-4c87-8ea8-57885df58169");
+        var livroParaAtualizar = livroRepository.findById(id).orElseThrow();
+
+        UUID idAutor = UUID.fromString("93695336-63e4-4c32-b4de-9f2cfbce5a9b");
+        Autor novoAutor = autorRepository.findById(idAutor).orElseThrow();
+
+        livroParaAtualizar.setAutor(novoAutor);
+
+        var livroAtualizado = livroRepository.save(livroParaAtualizar);
+        assertEquals(idAutor, livroAtualizado.getAutor().getId());
+    }
 }
