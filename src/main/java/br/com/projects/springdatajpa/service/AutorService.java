@@ -41,4 +41,13 @@ public class AutorService {
         }
         return repository.findAll();
     }
+
+    public Optional<Autor> atualizarAutor(UUID id, Autor dadosAtualizados){
+        return repository.findById(id).map(autor -> {
+          autor.setNome(dadosAtualizados.getNome());
+          autor.setDataNascimento(dadosAtualizados.getDataNascimento());
+          autor.setNacionalidade(dadosAtualizados.getNacionalidade());
+          return repository.save(autor);
+        });
+    }
 }
