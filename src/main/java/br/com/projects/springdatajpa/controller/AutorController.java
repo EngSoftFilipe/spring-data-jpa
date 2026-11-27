@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,10 +42,10 @@ public class AutorController {
         if(autorOptional.isPresent()){
             Autor autor = autorOptional.get();
             AutorDTO dto = new AutorDTO(
-                autor.getId(),
-                autor.getNome(),
-                autor.getDataNascimento(),
-                autor.getNacionalidade());
+                    autor.getId(),
+                    autor.getNome(),
+                    autor.getDataNascimento(),
+                    autor.getNacionalidade());
             return ResponseEntity.ok(dto);
         }
         return ResponseEntity.notFound().build();
@@ -59,5 +60,19 @@ public class AutorController {
         }
         service.deletar(autorOptional.get());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AutorDTO>> pesquisaDetalhada(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String nacionalidade){
+        List<Autor> resultado = service.pesquisaDetalhada(nome, nacionalidade);
+        List<AutorDTO> lista = resultado.stream().map(autor -> new AutorDTO(
+                autor.getId(),
+                autor.getNome(),
+                autor.getDataNascimento(),
+                autor.getNacionalidade())
+        ).toList();
+        return ResponseEntity.ok(lista);
     }
 }
